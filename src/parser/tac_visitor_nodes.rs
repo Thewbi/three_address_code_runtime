@@ -3,9 +3,11 @@ use antlr_rust::token::GenericToken;
 use antlr_rust::tree::{ParseTreeVisitorCompat, ParseTree};
 
 use crate::parser::tac_line_type::TacLineType;
+use crate::parser::tacparser::Binary_operatorContext;
 use crate::{parser::node::Node, common::number_literal_parser::number_literal_to_u16};
 use crate::common::number_literal_parser::is_number_literal_u16;
 
+use super::tacparser::{Or_operatorContext, And_operatorContext, Equals_operatorContext, Left_hand_sideContext};
 use super::{tacparser::{tacContextType, Source_lineContext, AssignmentContext, ExpressionContext, Compilation_unitContext}, tacvisitor::tacVisitorCompat, tac_line::TacLine};
 use std::cell::Ref;
 use std::borrow::Cow;
@@ -176,11 +178,18 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         self.line.line = token.line;
         self.line.column = token.column;
         self.line.lhs = visit_children_result[0].value.clone();
+        self.line.lhs_deref = visit_children_result[0].deref;
 
         if visit_children_result.len() > 2 {
 
-            // expression (= operator + operands)
-            if visit_children_result[2].expression 
+            if visit_children_result[0].expression && visit_children_result[2].expression
+            {
+                log::info!("1\n");
+
+                self.line.expression_1 = Some(Box::new(visit_children_result[0].clone()));
+                self.line.expression_2 = Some(Box::new(visit_children_result[2].clone()));
+            }
+            else if visit_children_result[2].expression 
             {
                 self.line.expression_1 = Some(Box::new(visit_children_result[2].clone()));
             }
@@ -288,6 +297,112 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
                 return vec![op_node.left(visit_children_result[0].clone()).right(visit_children_result[2].clone())];
             }
 
+        }
+
+        visit_children_result
+    }
+
+    fn visit_binary_operator(&mut self, ctx: &Binary_operatorContext<'i>) -> Self::Return {
+        self.descend_indent("visit_binary_operator");
+        let mut visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        let lhs_as_string: &String = &visit_children_result[0].value;
+
+        log::info!("lhs: {}\n", lhs_as_string);
+
+        return visit_children_result;
+    }
+
+    fn visit_or_operator(&mut self, ctx: &Or_operatorContext<'i>) -> Self::Return {
+        self.descend_indent("visit_or_operator");
+        let mut visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        let first_as_string: &String = &visit_children_result[0].value;
+        let second_as_string: &String = &visit_children_result[1].value;
+
+        log::info!("first_as_string: {}\n", first_as_string);
+        log::info!("second_as_string: {}\n", second_as_string);
+
+        let mut op_node: Node<String> = Node::new(String::from("||"));
+        op_node.expression = true;
+
+        return vec![op_node];
+    }
+
+    fn visit_and_operator(&mut self, ctx: &And_operatorContext<'i>) -> Self::Return {
+        self.descend_indent("visit_and_operator");
+        let mut visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        let first_as_string: &String = &visit_children_result[0].value;
+        let second_as_string: &String = &visit_children_result[1].value;
+
+        log::info!("first_as_string: {}\n", first_as_string);
+        log::info!("second_as_string: {}\n", second_as_string);
+
+        let mut op_node: Node<String> = Node::new(String::from("&&"));
+        op_node.expression = true;
+
+        return vec![op_node];
+    }
+
+    fn visit_equals_operator(&mut self, ctx: &Equals_operatorContext<'i>) -> Self::Return {
+        self.descend_indent("visit_equals_operator");
+        let mut visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        let first_as_string: &String = &visit_children_result[0].value;
+        let second_as_string: &String = &visit_children_result[1].value;
+
+        log::info!("first_as_string: {}\n", first_as_string);
+        log::info!("second_as_string: {}\n", second_as_string);
+
+        let mut op_node: Node<String> = Node::new(String::from("=="));
+        op_node.expression = true;
+
+        return vec![op_node];
+    }
+
+    fn visit_left_hand_side(&mut self, ctx: &Left_hand_sideContext<'i>) -> Self::Return {
+
+        self.descend_indent("visit_equals_operator");
+        let mut visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        if visit_children_result.len() == 1usize
+        {
+            return visit_children_result;
+        }
+        else if visit_children_result.len() == 2usize
+        {
+            let first_as_string: &String = &visit_children_result[0].value;
+            let second_as_string: &String = &visit_children_result[1].value;
+
+            log::info!("first_as_string: {}\n", first_as_string);
+            log::info!("second_as_string: {}\n", second_as_string);
+
+            let mut op_node: Node<String> = Node::new(second_as_string.clone());
+            op_node.deref = true;
+
+            return vec![op_node];
+        }
+        else if visit_children_result.len() == 4usize
+        {
+            log::info!("4\n");
+
+            log::info!("1: {:?} 2: {:?} 3: {:?} 4: {:?}", visit_children_result[0], visit_children_result[1], visit_children_result[2], visit_children_result[3]);
+        
+            if "*".eq(&visit_children_result[0].value) && "(".eq(&visit_children_result[1].value) && ")".eq(&visit_children_result[3].value)
+            {
+                let mut op_node: Node<String> = visit_children_result[2].clone();
+                op_node.deref = true;
+
+                return vec![op_node];
+            }
+
+            
         }
 
         visit_children_result

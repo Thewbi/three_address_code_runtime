@@ -7,6 +7,7 @@ use std::fmt;
 pub struct TacLine {
 
     pub lhs: String,
+    pub lhs_deref: bool,
 
     pub line_type: TacLineType,
 
@@ -44,6 +45,7 @@ impl TacLine {
 
     pub fn new(
         lhs: String,
+        lhs_deref: bool,
         line_type: TacLineType,
         // label: String,
         // instruction_type: InstructionType,
@@ -60,6 +62,7 @@ impl TacLine {
     ) -> TacLine {
         TacLine {
             lhs: lhs,
+            lhs_deref: lhs_deref,
             line_type: TacLineType::UNKNOWN,
             // record_type: record_type,
             // label: label,
@@ -84,6 +87,7 @@ impl TacLine {
 
     pub fn clear(&mut self) {
         self.lhs = String::default();
+        self.lhs_deref = false;
         self.line_type = TacLineType::UNKNOWN;
         // self.record_type = AsmRecordType::UNKNOWN;
         // self.label = String::default();
@@ -119,6 +123,7 @@ impl Default for TacLine {
     fn default() -> Self {
         Self {
             lhs: String::default(),
+            lhs_deref: false,
             line_type: TacLineType::UNKNOWN,
             // label: String::default(),
             // instruction_type: InstructionType::UNKNOWN,
@@ -144,8 +149,9 @@ impl Default for TacLine {
 impl fmt::Display for TacLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //write!(f, "(idx:{:<4} {:#04x}, addr:{:<4} {:#04x}, label:{:<10}, rtype:{:<5}, itype:{:<5}, reg_1:{:<3} {:#04x}, reg_2:{:<3} {:#04x}, expr_1: {:?}, expr_2: {:?}, data:{} {:#04x}, tgt_label:{}, tgt_addr:{}, source_file:{}, line:{}, column:{})", 
-        write!(f, "(lhs: {:?}, type: {:?}, expr_1: {:?}, expr_2: {:?}, source_file:{}, line:{}, column:{})", 
+        write!(f, "(lhs: {:?}, lhs_deref: {:?}, type: {:?}, expr_1: {:?}, expr_2: {:?}, source_file:{}, line:{}, column:{})", 
             self.lhs,
+            self.lhs_deref,
             self.line_type,
             // self.idx, self.idx,
             // self.address, self.address,
