@@ -32,6 +32,7 @@ pub type LocalTokenFactory<'input> = antlr_rust::token_factory::ArenaCommonFacto
 
 
 
+// thread 'main' panicked at 'attempt to shift left with overflow', src\parser\tacparser.rs:428:45
 
 while (((_la) & !0x3f) == 0 
 				&& (
@@ -45,3 +46,5 @@ while (((_la) & !0x3f) == 0
 						|| 
 						((((_la - 33)) & !0x3f) == 0 && ((1usize << (_la - 33)) & ((1usize << (POP - 33)) | (1usize << (PRINT - 33)) | (1usize << (PUSH - 33)) | (1usize << (RETURN - 33)) | (1usize << (SIZEOF - 33)) | (1usize << (SQRT - 33)) | (1usize << (VTABLE - 33)) | (1usize << (IDENTIFIER - 33)))
 					) != 0) 
+
+{

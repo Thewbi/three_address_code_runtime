@@ -87,17 +87,17 @@ TRUE : T R U E ;
 
 VTABLE : V T A B L E ;
 
-NEWLINE : '\r'? '\n' -> channel(HIDDEN) ;
+//NEWLINE : '\r'? '\n' -> channel(HIDDEN) ;
+NEWLINE : '\r'? '\n' ;
 
 //WS : [ \t\n\r\f]+ -> channel(HIDDEN) ;
-WS : [ \t\f]+ -> channel(HIDDEN) ;
-//WS : [ \t\n\r\f]+ -> skip  ;
-
+//WS : [ \t\f]+ -> channel(HIDDEN) ;
+WS : [ \t\n\r\f]+ -> skip  ;
 
 //LINE_COMMENT : ';' ~[\r\n]* -> channel(HIDDEN) ;
 LINE_COMMENT 
     : 
-    ';' ~[\r\n]* -> channel(HIDDEN)
+    ( ';' ) ~[\r\n]* -> skip 
     ;
 
 //BLOCK_COMMENT 

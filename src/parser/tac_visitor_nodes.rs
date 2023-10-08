@@ -211,10 +211,11 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
     fn visit_expression(&mut self, ctx: &ExpressionContext<'i>) -> Self::Return {
         self.descend_indent("visit_expression");
-        let visit_children_result = self.visit_children(ctx);
+        let mut visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
-        if visit_children_result.len() == 1usize {
+        if visit_children_result.len() == 1usize 
+        {
 
             // // if the value is a number, return it
             // let parse_result = visit_children_result[0].value.parse::<u16>();
@@ -229,6 +230,48 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
             let mut literal_expression: Node<String> = Node::new(visit_children_result[0].value.clone());
             literal_expression.expression = true;
             return vec![literal_expression];
+
+        } 
+        else if visit_children_result.len() == 3usize 
+        {
+
+            if "(".eq(&visit_children_result[0].value) && ")".eq(&visit_children_result[2].value)
+            {
+                visit_children_result.remove(2);
+                visit_children_result.remove(0);
+
+                return visit_children_result;
+            }
+            // else if ".".eq(&visit_children_result[0].value)
+            // {
+            //     let sign: &str = visit_children_result[1].value.as_str();
+            //     let mut offset: i16 = number_literal_to_u16(&visit_children_result[2].value) as i16;
+            //     if sign == "-"
+            //     {
+            //         offset *= -1i16;
+            //     }
+
+            //     log::trace!("sign: {}, offset: {}", sign, offset);
+
+            //     let binary_tree: Node<String> = Node::new(offset.to_string());
+            //     return vec![binary_tree];
+            // } 
+            else 
+            {
+                // lhs << rhs
+                let lhs_as_string: &String = &visit_children_result[0].value;
+                let op_as_string: &String = &visit_children_result[1].value;
+                let rhs_as_string: &String = &visit_children_result[2].value;
+
+                if self.debug_output {
+                    println!("lhs: {} op: {} rhs: {}", lhs_as_string, op_as_string, rhs_as_string);
+                }
+                let mut op_node: Node<String> = Node::new(op_as_string.clone());
+                op_node.expression = true;
+
+                return vec![op_node.left(visit_children_result[0].clone()).right(visit_children_result[2].clone())];
+            }
+
         }
 
         visit_children_result

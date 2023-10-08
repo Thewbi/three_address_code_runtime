@@ -3,7 +3,9 @@ options { tokenVocab=tac_lexer; }
 
 
 compilation_unit :
-	( source_line )*
+	NEWLINE* 
+    source_line ( NEWLINE* source_line )* NEWLINE* 
+    EOF 
 	;
 	
 source_line :
