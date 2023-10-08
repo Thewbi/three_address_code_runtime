@@ -57,11 +57,13 @@ predicate :
 	;
 	
 expression :
-    operand
+	OPENING_BRACKET expression CLOSEING_BRACKET
     |
-	operand binary_operator operand
+	expression binary_operator expression
 	|
-	unary_operator operand
+	unary_operator expression
+	|
+    operand
 	;
 	
 unary_operator :
@@ -120,8 +122,6 @@ operand :
 	function_call
 	|
 	class_method_identifier
-	|
-	OPENING_BRACKET expression CLOSEING_BRACKET
 	;
 	
 function_call :

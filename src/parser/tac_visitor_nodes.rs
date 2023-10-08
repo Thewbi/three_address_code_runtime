@@ -232,6 +232,22 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
             return vec![literal_expression];
 
         } 
+        else if visit_children_result.len() == 2usize 
+        {
+            //log::info!("test\n");
+
+            let op_as_string: &String = &visit_children_result[0].value;
+            let lhs_as_string: &String = &visit_children_result[1].value;
+
+            if self.debug_output {
+                println!("lhs: {} op: {}", lhs_as_string, op_as_string);
+            }
+
+            let mut op_node: Node<String> = Node::new(op_as_string.clone());
+            op_node.expression = true;
+
+            return vec![op_node.left(visit_children_result[1].clone())];
+        }
         else if visit_children_result.len() == 3usize 
         {
 

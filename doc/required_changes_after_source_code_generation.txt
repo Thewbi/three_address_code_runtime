@@ -25,7 +25,7 @@ pub type LocalTokenFactory<'input> = antlr_rust::token_factory::ArenaCommonFacto
 
 
 
-C:\aaa_se\rust\three_address_code_runtime\src\parser\tacparser.rs
+C:\aaa_se\rust\three_address_code_runtime\src\parser\tacparser.rs - line 163
 
 //pub type LocalTokenFactory<'input> = CommonTokenFactory;
 pub type LocalTokenFactory<'input> = antlr_rust::token_factory::ArenaCommonFactory<'input>;
