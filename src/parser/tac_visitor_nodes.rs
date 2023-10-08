@@ -170,7 +170,6 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
         let token: Ref<'_, GenericToken<Cow<'_, str>>> = ctx.start();
 
-        //let mut line: TacLine = TacLine::default();
         self.line = TacLine::default();
         self.line.line_type = TacLineType::ASSIGNMENT;
         self.line.source_file = self.source_file.clone();
@@ -217,18 +216,19 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
         if visit_children_result.len() == 1usize {
 
-            // if the value is a number, return it
-            let parse_result = visit_children_result[0].value.parse::<u16>();
-            if parse_result.is_ok() {
-                //return visit_children_result;
+            // // if the value is a number, return it
+            // let parse_result = visit_children_result[0].value.parse::<u16>();
+            // if parse_result.is_ok() {
+            //     let mut literal_expression: Node<String> = Node::new(visit_children_result[0].value.clone());
+            //     literal_expression.expression = true;
 
-                let mut literal_expression: Node<String> = Node::new(visit_children_result[0].value.clone());
-                literal_expression.expression = true;
+            //     //return vec![binary_tree.left(visit_children_result[2].clone())];
+            //     return vec![literal_expression];
+            // }
 
-                //return vec![binary_tree.left(visit_children_result[2].clone())];
-                return vec![literal_expression];
-
-            }
+            let mut literal_expression: Node<String> = Node::new(visit_children_result[0].value.clone());
+            literal_expression.expression = true;
+            return vec![literal_expression];
         }
 
         visit_children_result
