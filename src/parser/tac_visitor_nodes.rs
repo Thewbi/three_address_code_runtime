@@ -1,10 +1,20 @@
+use antlr_rust::parser_rule_context::ParserRuleContext;
+use antlr_rust::token::GenericToken;
 use antlr_rust::tree::{ParseTreeVisitorCompat, ParseTree};
 
-use crate::parser::node::Node;
+use crate::parser::tac_line_type::TacLineType;
+use crate::{parser::node::Node, common::number_literal_parser::number_literal_to_u16};
+use crate::common::number_literal_parser::is_number_literal_u16;
 
-use super::{tacparser::{tacContextType, Source_lineContext, AssignmentContext, ExpressionContext}, tacvisitor::tacVisitorCompat};
+use super::{tacparser::{tacContextType, Source_lineContext, AssignmentContext, ExpressionContext, Compilation_unitContext}, tacvisitor::tacVisitorCompat, tac_line::TacLine};
+use std::cell::Ref;
+use std::borrow::Cow;
 
 pub struct TacVisitorNodes {
+
+    // result
+    pub lines: Vec<TacLine>,
+    pub line: TacLine,
 
     // debug
     pub debug_output: bool,
@@ -13,16 +23,24 @@ pub struct TacVisitorNodes {
     // traversal
     pub return_val: Vec<Node<String>>,
 
+    // the source file that this visitor visits
+    pub source_file: String,
+
 }
 
 impl Default for TacVisitorNodes {
     fn default() -> Self {
         Self {
 
+            lines: Vec::new(),
+            line: TacLine::default(),
+
             indent: 0u16,
             debug_output: true,
 
             return_val: Vec::new(),
+
+            source_file: String::default(),
 
         }
     }
@@ -34,6 +52,7 @@ impl<'i> TacVisitorNodes {
         if !self.debug_output {
             return;
         }
+
         self.indent = self.indent - 1;
     }
 
@@ -41,15 +60,19 @@ impl<'i> TacVisitorNodes {
         if !self.debug_output {
             return;
         }
-        self.indent = self.indent + 1;
+        
         for _n in 0..self.indent {
             print!("  ");
         }
         println!("{}", label);
+        
+        self.indent = self.indent + 1;
     }
 
     pub fn reset_self(&mut self) {
         //self.record.clear();
+        self.indent = 0;
+        self.return_val.clear();
     }
 
 }
@@ -121,10 +144,21 @@ impl<'i> ParseTreeVisitorCompat<'i> for TacVisitorNodes {
 
 impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
+    fn visit_compilation_unit(&mut self, ctx: &Compilation_unitContext<'i>) -> Self::Return {
+        self.descend_indent("visit_compilation_unit");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        visit_children_result
+    }
+
     fn visit_source_line(&mut self, ctx: &Source_lineContext<'i>) -> Self::Return {
         self.descend_indent("visit_source_line");
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
+
+        self.lines.push(self.line.clone());
+        self.line.clear();
 
         visit_children_result
     }
@@ -134,6 +168,45 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
+        let token: Ref<'_, GenericToken<Cow<'_, str>>> = ctx.start();
+
+        //let mut line: TacLine = TacLine::default();
+        self.line = TacLine::default();
+        self.line.line_type = TacLineType::ASSIGNMENT;
+        self.line.source_file = self.source_file.clone();
+        self.line.line = token.line;
+        self.line.column = token.column;
+        self.line.lhs = visit_children_result[0].value.clone();
+
+        if visit_children_result.len() > 2 {
+
+            // expression (= operator + operands)
+            if visit_children_result[2].expression 
+            {
+                self.line.expression_1 = Some(Box::new(visit_children_result[2].clone()));
+            }
+            // else 
+            // {
+            //     let param_1: &String = &visit_children_result[2].value;
+
+            //     if is_number_literal_u16(param_1) 
+            //     {
+            //         param_1_as_number = number_literal_to_u16(&param_1);
+            //         tac_line.dest = param_1_as_number;
+            //     }
+            // }
+
+        }
+
+        if visit_children_result.len() > 3 {
+
+            if visit_children_result[3].expression 
+            {
+                self.line.expression_2 = Some(Box::new(visit_children_result[3].clone()));
+            }
+
+        }
+
         visit_children_result
     }
 
@@ -141,6 +214,22 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         self.descend_indent("visit_expression");
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
+
+        if visit_children_result.len() == 1usize {
+
+            // if the value is a number, return it
+            let parse_result = visit_children_result[0].value.parse::<u16>();
+            if parse_result.is_ok() {
+                //return visit_children_result;
+
+                let mut literal_expression: Node<String> = Node::new(visit_children_result[0].value.clone());
+                literal_expression.expression = true;
+
+                //return vec![binary_tree.left(visit_children_result[2].clone())];
+                return vec![literal_expression];
+
+            }
+        }
 
         visit_children_result
     }

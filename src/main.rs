@@ -1,4 +1,5 @@
 mod parser;
+mod common;
 
 use std::fs;
 use std::rc::Rc;
@@ -30,7 +31,7 @@ use crate::parser::tac_visitor_nodes;
 // cargo clean
 // cargo build
 // cargo run --bin build_parser
-// cargo run --bin whatavr
+// cargo run --bin three_address_code_runtime
 //
 // cargo run
 //
@@ -175,15 +176,25 @@ fn parse_and_encode(/*segments: &mut Vec<Segment>, */
     let root: Rc<Compilation_unitContextAll> = result.unwrap();
 
     log::info!("*************************************************\n");
-    log::info!("Phase - AST Visiting - First Phase - Create AsmRecords and digest expression trees\n");
+    log::info!("Phase - AST Visiting - First Phase - Create Lines and digest expression trees\n");
     log::info!("*************************************************\n");
 
     // node visitor
     let mut visitor: TacVisitorNodes = TacVisitorNodes::default();
-    //visitor.source_file = source_file.clone();
+    visitor.source_file = source_file.clone();
     //visitor.record.clear();
 
     let _visitor_result = visitor.visit(&*root);
+
+    log::info!("*************************************************************\n");
+    log::info!("Phase - DEBUG - Output all lines after digestion\n");
+    log::info!("*************************************************************\n");
+
+    log::info!("\n");
+    for line in visitor.lines.iter_mut() {
+        log::info!("{}\n", line);
+        log::info!("\n");
+    }
 
 }
 
