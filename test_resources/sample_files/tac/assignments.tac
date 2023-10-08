@@ -1,7 +1,7 @@
 
 
 
-;_t0 = 5             ; expected: (lhs: "_t0", type: ASSIGNMENT, expr_1: Some(Node["5" expr:true LHS:None RHS:None]), expr_2: None, source_file:test_resources/sample_files/tac/assignments.tac, line:1, column:0)
+_t0 = 5             ; expected: (lhs: "_t0", type: ASSIGNMENT, expr_1: Some(Node["5" expr:true LHS:None RHS:None]), expr_2: None, source_file:test_resources/sample_files/tac/assignments.tac, line:1, column:0)
 ;_t1 = x
 
 
@@ -25,4 +25,5 @@
 ;*(this + 4) = x
 ;x = *(this + 8)
 
-t5 = sqrt(t4)
+;t5 = sqrt(t4)
+;t_3 = sizeof(int)

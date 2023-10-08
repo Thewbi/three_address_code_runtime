@@ -35,9 +35,7 @@ assignment :
 	;
 	
 left_hand_side :
-    ( ASTERISK )? IDENTIFIER
-	|
-	( ASTERISK )? OPENING_BRACKET expression CLOSEING_BRACKET
+    expression
     ;
 
 lcall_expression :
