@@ -7,7 +7,7 @@ use crate::parser::tacparser::Binary_operatorContext;
 use crate::{parser::node::Node, common::number_literal_parser::number_literal_to_u16};
 use crate::common::number_literal_parser::is_number_literal_u16;
 
-use super::tacparser::{Or_operatorContext, And_operatorContext, Equals_operatorContext, Left_hand_sideContext, Function_callContext, OperandContext};
+use super::tacparser::{Or_operatorContext, And_operatorContext, Equals_operatorContext, Left_hand_sideContext, Function_callContext, OperandContext, LabelContext, If_statementContext, Control_flowContext, PredicateContext};
 use super::{tacparser::{tacContextType, Source_lineContext, AssignmentContext, ExpressionContext, Compilation_unitContext}, tacvisitor::tacVisitorCompat, tac_line::TacLine};
 use std::cell::Ref;
 use std::borrow::Cow;
@@ -146,7 +146,8 @@ impl<'i> ParseTreeVisitorCompat<'i> for TacVisitorNodes {
 
 impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
-    fn visit_compilation_unit(&mut self, ctx: &Compilation_unitContext<'i>) -> Self::Return {
+    fn visit_compilation_unit(&mut self, ctx: &Compilation_unitContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_compilation_unit");
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
@@ -154,7 +155,8 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         visit_children_result
     }
 
-    fn visit_source_line(&mut self, ctx: &Source_lineContext<'i>) -> Self::Return {
+    fn visit_source_line(&mut self, ctx: &Source_lineContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_source_line");
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
@@ -165,14 +167,26 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         visit_children_result
     }
 
-    fn visit_assignment(&mut self, ctx: &AssignmentContext<'i>) -> Self::Return {
+    fn visit_label(&mut self, ctx: &LabelContext<'i>) -> Self::Return
+    {
+        self.descend_indent("visit_label");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        self.line.label = visit_children_result[0].value.clone();
+
+        visit_children_result
+    }
+
+    fn visit_assignment(&mut self, ctx: &AssignmentContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_assignment");
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
         let token: Ref<'_, GenericToken<Cow<'_, str>>> = ctx.start();
 
-        self.line = TacLine::default();
+        // self.line = TacLine::default();
         self.line.line_type = TacLineType::ASSIGNMENT;
         self.line.source_file = self.source_file.clone();
         self.line.line = token.line;
@@ -230,14 +244,14 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         visit_children_result
     }
 
-    fn visit_expression(&mut self, ctx: &ExpressionContext<'i>) -> Self::Return {
+    fn visit_expression(&mut self, ctx: &ExpressionContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_expression");
         let mut visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
         if visit_children_result.len() == 1usize 
         {
-
             // // if the value is a number, return it
             // let parse_result = visit_children_result[0].value.parse::<u16>();
             // if parse_result.is_ok() {
@@ -278,7 +292,6 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         }
         else if visit_children_result.len() == 3usize 
         {
-
             if "(".eq(&visit_children_result[0].value) && ")".eq(&visit_children_result[2].value)
             {
                 visit_children_result.remove(2);
@@ -321,7 +334,8 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         visit_children_result
     }
 
-    fn visit_binary_operator(&mut self, ctx: &Binary_operatorContext<'i>) -> Self::Return {
+    fn visit_binary_operator(&mut self, ctx: &Binary_operatorContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_binary_operator");
         let mut visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
@@ -333,7 +347,8 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         return visit_children_result;
     }
 
-    fn visit_or_operator(&mut self, ctx: &Or_operatorContext<'i>) -> Self::Return {
+    fn visit_or_operator(&mut self, ctx: &Or_operatorContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_or_operator");
         let mut visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
@@ -350,9 +365,10 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         return vec![op_node];
     }
 
-    fn visit_and_operator(&mut self, ctx: &And_operatorContext<'i>) -> Self::Return {
+    fn visit_and_operator(&mut self, ctx: &And_operatorContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_and_operator");
-        let mut visit_children_result = self.visit_children(ctx);
+        let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
         let first_as_string: &String = &visit_children_result[0].value;
@@ -367,9 +383,10 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         return vec![op_node];
     }
 
-    fn visit_equals_operator(&mut self, ctx: &Equals_operatorContext<'i>) -> Self::Return {
+    fn visit_equals_operator(&mut self, ctx: &Equals_operatorContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_equals_operator");
-        let mut visit_children_result = self.visit_children(ctx);
+        let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
         let first_as_string: &String = &visit_children_result[0].value;
@@ -384,10 +401,10 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         return vec![op_node];
     }
 
-    fn visit_left_hand_side(&mut self, ctx: &Left_hand_sideContext<'i>) -> Self::Return {
-
+    fn visit_left_hand_side(&mut self, ctx: &Left_hand_sideContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_left_hand_side");
-        let mut visit_children_result = self.visit_children(ctx);
+        let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
         if visit_children_result.len() == 1usize
@@ -420,17 +437,15 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
                 return vec![op_node];
             }
-
-            
         }
 
         visit_children_result
     }
 
-    fn visit_function_call(&mut self, ctx: &Function_callContext<'i>) -> Self::Return {
-
+    fn visit_function_call(&mut self, ctx: &Function_callContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_function_call");
-        let mut visit_children_result = self.visit_children(ctx);
+        let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
         let function_name: &String = &visit_children_result[0].value;
@@ -467,12 +482,81 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         visit_children_result
     }
 
-    fn visit_operand(&mut self, ctx: &OperandContext<'i>) -> Self::Return {
+    fn visit_operand(&mut self, ctx: &OperandContext<'i>) -> Self::Return
+    {
         self.descend_indent("visit_operand");
-        let mut visit_children_result = self.visit_children(ctx);
+        let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
-        log::info!("visit_operand: {:?}\n", visit_children_result[0]);
+        //log::info!("visit_operand: {:?}\n", visit_children_result[0]);
+
+        visit_children_result
+    }
+
+    fn visit_control_flow(&mut self, ctx: &Control_flowContext<'i>) -> Self::Return
+    { 
+        self.descend_indent("visit_if_statement");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        if self.line.line_type == TacLineType::IF_STATEMENT
+        {
+            self.line.expression_1 = Some(Box::new(visit_children_result[0].clone()));
+            self.line.target_label = visit_children_result[2].value.clone();
+        }
+        
+        if visit_children_result[0].value.to_lowercase().eq("goto")
+        {
+            self.line.line_type = TacLineType::GOTO;
+            self.line.target_label = visit_children_result[1].value.clone();
+        }
+
+        if visit_children_result[0].value.to_lowercase().eq("call")
+        {
+            self.line.line_type = TacLineType::CALL;
+            self.line.target_label = visit_children_result[1].value.clone();
+        }
+
+        visit_children_result
+    }
+
+    fn visit_if_statement(&mut self, ctx: &If_statementContext<'i>) -> Self::Return
+    {
+        self.descend_indent("visit_if_statement");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        self.line.line_type = TacLineType::IF_STATEMENT;
+
+        let predicate_node: Node<String> = visit_children_result[2].clone();//Some(Box::new(visit_children_result[0].clone()));
+
+        return vec![predicate_node];
+    }
+
+    fn visit_predicate(&mut self, ctx: &PredicateContext<'i>) -> Self::Return
+    {
+        self.descend_indent("visit_predicate");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        if visit_children_result.len() == 1 && visit_children_result[0].expression
+        {
+            return vec![visit_children_result[0].clone()];
+        }
+        else 
+        {
+            let lhs_as_string: &String = &visit_children_result[0].value;
+            let op_as_string: &String = &visit_children_result[1].value;
+            let rhs_as_string: &String = &visit_children_result[2].value;
+
+            if self.debug_output {
+                println!("lhs: {} op: {} rhs: {}", lhs_as_string, op_as_string, rhs_as_string);
+            }
+            let mut op_node: Node<String> = Node::new(op_as_string.clone());
+            op_node.expression = true;
+
+            return vec![op_node.left(visit_children_result[0].clone()).right(visit_children_result[2].clone())];
+        }
 
         visit_children_result
     }

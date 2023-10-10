@@ -166,7 +166,7 @@ function_identifier :
 	
 function_definition :
 	BEGINFUNC IDENTIFIER
-		function_body
+		function_body NEWLINE?
 	ENDFUNC
 	;
 	
@@ -191,7 +191,6 @@ function_body :
 //     A a;
 //     a.fn(137);
 // }
-
 
 class_method_identifier :
 	IDENTIFIER DOT IDENTIFIER

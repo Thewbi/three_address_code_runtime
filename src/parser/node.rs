@@ -17,6 +17,9 @@ pub struct Node<T> {
 }
 
 impl<T> Node<T> {
+
+    // USAGE: 
+    // let mut op_node: Node<String> = Node::new(String::from("sqrt"));
     pub fn new(value: T) -> Self {
         Node {
             value,

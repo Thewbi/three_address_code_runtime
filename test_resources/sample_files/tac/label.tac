@@ -1,0 +1,3 @@
+LABEL_1:
+LABEL_2:
+LABEL_3: i = 2
