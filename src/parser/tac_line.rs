@@ -44,6 +44,7 @@ pub struct TacLine {
 
 impl TacLine {
 
+    #[allow(dead_code)]
     pub fn new(
         lhs: String,
         lhs_deref: bool,
@@ -64,7 +65,7 @@ impl TacLine {
         TacLine {
             lhs: lhs,
             lhs_deref: lhs_deref,
-            line_type: TacLineType::UNKNOWN,
+            line_type: line_type,
             // record_type: record_type,
             label: label,
             parameter_list: Vec::default(),

@@ -1,5 +1,6 @@
 use regex::Regex;
 
+#[allow(dead_code)]
 pub fn is_number_literal_u16(data: &String) -> bool {
 
     if data.to_lowercase().starts_with("0b")
@@ -32,6 +33,7 @@ pub fn is_number_literal_u16(data: &String) -> bool {
 
 }
 
+#[allow(dead_code)]
 pub fn is_number_literal_i16(data: &String) -> bool {
 
     if data.to_lowercase().starts_with("0b")
@@ -108,6 +110,7 @@ mod tests {
 
 }
 
+#[allow(dead_code)]
 pub fn number_literal_to_u8(data: &String) -> u8 {
 
     if data.to_lowercase().starts_with("0b")
@@ -139,6 +142,7 @@ pub fn number_literal_to_u8(data: &String) -> u8 {
 
 }
 
+#[allow(dead_code)]
 pub fn number_literal_to_u16(data: &String) -> u16 {
 
     if data.to_lowercase().starts_with("0b")
@@ -170,6 +174,7 @@ pub fn number_literal_to_u16(data: &String) -> u16 {
 
 }
 
+#[allow(dead_code)]
 pub fn number_literal_to_u32(data: &String) -> u32 {
 
     if data.to_lowercase().starts_with("0b")
@@ -201,6 +206,7 @@ pub fn number_literal_to_u32(data: &String) -> u32 {
 
 }
 
+#[allow(dead_code)]
 pub fn number_literal_to_i16(data: &String) -> i16 {
 
     if data.to_lowercase().starts_with("0b")
@@ -232,6 +238,7 @@ pub fn number_literal_to_i16(data: &String) -> i16 {
 
 }
 
+#[allow(dead_code)]
 pub fn number_literal_to_i32(data: &String) -> i32 {
 
     if data.to_lowercase().starts_with("0b")
@@ -263,6 +270,7 @@ pub fn number_literal_to_i32(data: &String) -> i32 {
 
 }
 
+#[allow(dead_code)]
 pub fn is_char_literal(input: &String) -> bool
 {
     let trimmed_input = input.trim();
@@ -272,6 +280,7 @@ pub fn is_char_literal(input: &String) -> bool
     re.is_match(trimmed_input)
 }
 
+#[allow(dead_code)]
 pub fn char_literal_to_u16(input: &String) -> u16
 {
     let trimmed_input = input.trim();

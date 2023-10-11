@@ -1,6 +1,9 @@
+/*
 BeginFunc test_func
     _t0 = x * x
 EndFunc
+*/
+
 
 BeginFunc test_func
 	_t0 = x * x
@@ -14,6 +17,7 @@ _L0:
 _L1:
 EndFunc
 
+/*
 BeginFunc _8
     _t0 = 137
     push _t0
@@ -33,3 +37,4 @@ BeginFunc _8
     call _A.fn
     pop 8 			; remove the topmost eight byte from the stack without placing them in any register
 EndFunc
+*/

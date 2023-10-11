@@ -175,10 +175,21 @@ function_definition :
 		function_body NEWLINE?
 	ENDFUNC
 	;
-	
+
 function_body :
-	( source_line )+
+	NEWLINE* 
+    source_line ( NEWLINE* source_line )* NEWLINE* 
 	;
+	
+//function_body :
+//	( 
+//		( label COLON )
+//		|
+//		source_line
+//		|
+//		NEWLINE
+//	)+
+//	;
 
 //
 // TAC for Objects

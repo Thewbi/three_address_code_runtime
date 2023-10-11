@@ -1,6 +1,7 @@
 #[derive(PartialEq)]
 #[derive(Debug, Copy, Clone)]
 #[derive(Default)]
+#[allow(non_camel_case_types)]
 pub enum TacLineType {
 
     ASSIGNMENT,
@@ -21,6 +22,10 @@ pub enum TacLineType {
 
     RETURN,
 
+    FUNC_DEFINITION,
+
+    FUNC_DEFINITION_END,
+
     #[default]
     UNKNOWN,
 
@@ -28,6 +33,7 @@ pub enum TacLineType {
 
 impl TacLineType {
 
+    #[allow(dead_code)]
     pub fn to_string(&self) -> String { 
 
         match self {
@@ -37,6 +43,11 @@ impl TacLineType {
             TacLineType::GOTO => String::from("GOTO"),
             TacLineType::BREAK => String::from("BREAK"),
             TacLineType::PRINT => String::from("PRINT"),
+            TacLineType::PUSH => String::from("PUSH"),
+            TacLineType::POP => String::from("POP"),
+            TacLineType::RETURN => String::from("RETURN"),
+            TacLineType::FUNC_DEFINITION => String::from("FUNC_DEFINITION"),
+            TacLineType::FUNC_DEFINITION_END => String::from("FUNC_DEFINITION_END"),
             _ => String::from("UNKNOWN"),
         }
 

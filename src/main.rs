@@ -4,8 +4,6 @@ mod common;
 use std::fs;
 use std::rc::Rc;
 use std::collections::HashMap;
-use std::io;
-use std::io::Cursor;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -19,7 +17,6 @@ use log::LevelFilter;
 use crate::parser::tac_visitor_nodes::TacVisitorNodes;
 use crate::parser::tacparser::Compilation_unitContextAll;
 use crate::parser::tacparser::tacContextType;
-use crate::parser::tac_visitor_nodes;
 
 //
 // First, build the grammar
@@ -139,13 +136,13 @@ fn load_segment_from_source_code(/*segments: &mut Vec<Segment>,*/ symbol_table: 
     //source_code_file_path.push_str("test_resources/sample_files/tac/assignments.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/break.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/call_statement.tac");
-    //source_code_file_path.push_str("test_resources/sample_files/tac/function_definition.tac"); // test
+    source_code_file_path.push_str("test_resources/sample_files/tac/function_definition.tac"); // test
     //source_code_file_path.push_str("test_resources/sample_files/tac/goto.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/if_statement.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/label.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/print.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/push_pop.tac");
-    source_code_file_path.push_str("test_resources/sample_files/tac/return.tac");
+    //source_code_file_path.push_str("test_resources/sample_files/tac/return.tac");
 
     let srcdir = PathBuf::from(&source_code_file_path);
     log::info!("absolute path: {:?}\n", fs::canonicalize(&srcdir));
@@ -155,14 +152,14 @@ fn load_segment_from_source_code(/*segments: &mut Vec<Segment>,*/ symbol_table: 
 
     let input_stream: InputStream<&str> = InputStream::new(data.as_str());
 
-    parse_and_encode(/*segments, */input_stream, source_code_file_path.clone(), symbol_table)
+    parse_and_encode(/*segments, */input_stream, source_code_file_path.clone()/*, symbol_table */)
 
 }
 
 fn parse_and_encode(/*segments: &mut Vec<Segment>, */
     input_stream: InputStream<&str>, 
     source_file: String,
-    symbol_table: &mut HashMap<String, u32>) /*-> [u8; RAMEND as usize] */
+/*symbol_table: &mut HashMap<String, u32>*/) /*-> [u8; RAMEND as usize] */
 {
     //
     // Phase - AST Creation (Grammar Lexing and Parsing)
