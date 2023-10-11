@@ -1,5 +1,3 @@
-use std::fmt;
-
 #[derive(PartialEq)]
 #[derive(Debug, Copy, Clone)]
 #[derive(Default)]
@@ -12,6 +10,16 @@ pub enum TacLineType {
     CALL,
 
     GOTO,
+
+    BREAK,
+
+    PRINT,
+
+    PUSH,
+
+    POP,
+
+    RETURN,
 
     #[default]
     UNKNOWN,
@@ -27,6 +35,8 @@ impl TacLineType {
             TacLineType::IF_STATEMENT => String::from("IF_STATEMENT"),
             TacLineType::CALL => String::from("CALL"),
             TacLineType::GOTO => String::from("GOTO"),
+            TacLineType::BREAK => String::from("BREAK"),
+            TacLineType::PRINT => String::from("PRINT"),
             _ => String::from("UNKNOWN"),
         }
 

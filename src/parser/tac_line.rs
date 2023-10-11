@@ -22,6 +22,7 @@ pub struct TacLine {
     pub expression_2: Option<Box<Node<String>>>,
 
     // pub data: u16,
+    pub parameter_list: Vec<String>,
 
     pub target_label: String,
     // pub target_address: i16,
@@ -66,6 +67,7 @@ impl TacLine {
             line_type: TacLineType::UNKNOWN,
             // record_type: record_type,
             label: label,
+            parameter_list: Vec::default(),
             // instruction_type: instruction_type,
             // reg_1: reg_1,
             // reg_2: reg_2,
@@ -97,6 +99,7 @@ impl TacLine {
         self.expression_1 = None;
         self.expression_2 = None;
         // self.data = u16::default();
+        self.parameter_list = Vec::default();
         self.target_label = String::default();
         // self.target_address = 0i16;
         // self.io_dest = IoDestination::UNKNOWN;
@@ -132,6 +135,7 @@ impl Default for TacLine {
             expression_1: None,
             expression_2: None,
             // data: u16::default(),
+            parameter_list: Vec::default(),
             target_label: String::default(),
             // target_address : 0i16,
             // io_dest: IoDestination::UNKNOWN,
@@ -149,7 +153,7 @@ impl Default for TacLine {
 impl fmt::Display for TacLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //write!(f, "(idx:{:<4} {:#04x}, addr:{:<4} {:#04x}, label:{:<10}, rtype:{:<5}, itype:{:<5}, reg_1:{:<3} {:#04x}, reg_2:{:<3} {:#04x}, expr_1: {:?}, expr_2: {:?}, data:{} {:#04x}, tgt_label:{}, tgt_addr:{}, source_file:{}, line:{}, column:{})", 
-        write!(f, "(lhs: {:?}, lhs_deref: {:?}, type: {:?}, label: {:?}, expr_1: {:?}, expr_2: {:?}, target_label: {:?}, source_file:{}, line:{}, column:{})", 
+        write!(f, "(lhs: {:?}, lhs_deref: {:?}, type: {:?}, label: {:?}, expr_1: {:?}, expr_2: {:?}, parameter_list: {:?}, target_label: {:?}, source_file:{}, line:{}, column:{})", 
             self.lhs,
             self.lhs_deref,
             self.line_type,
@@ -161,6 +165,7 @@ impl fmt::Display for TacLine {
             // self.reg_2, self.reg_2,
             self.expression_1, self.expression_2,
             // self.data, self.data,
+            self.parameter_list,
             self.target_label, //self.target_address,
             self.source_file, self.line, self.column)
     }

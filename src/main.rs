@@ -137,14 +137,14 @@ fn load_segment_from_source_code(/*segments: &mut Vec<Segment>,*/ symbol_table: 
 
     let mut source_code_file_path: String = String::new();
     //source_code_file_path.push_str("test_resources/sample_files/tac/assignments.tac");
-    source_code_file_path.push_str("test_resources/sample_files/tac/break.tac");
-    source_code_file_path.push_str("test_resources/sample_files/tac/call_statement.tac");
-    source_code_file_path.push_str("test_resources/sample_files/tac/function_definition.tac");
+    //source_code_file_path.push_str("test_resources/sample_files/tac/break.tac");
+    //source_code_file_path.push_str("test_resources/sample_files/tac/call_statement.tac");
+    //source_code_file_path.push_str("test_resources/sample_files/tac/function_definition.tac"); // test
     //source_code_file_path.push_str("test_resources/sample_files/tac/goto.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/if_statement.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/label.tac");
-    source_code_file_path.push_str("test_resources/sample_files/tac/print.tac");
-    source_code_file_path.push_str("test_resources/sample_files/tac/push_pop.tac");
+    //source_code_file_path.push_str("test_resources/sample_files/tac/print.tac");
+    //source_code_file_path.push_str("test_resources/sample_files/tac/push_pop.tac");
     source_code_file_path.push_str("test_resources/sample_files/tac/return.tac");
 
     let srcdir = PathBuf::from(&source_code_file_path);

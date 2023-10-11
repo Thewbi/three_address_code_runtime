@@ -136,10 +136,16 @@ function_call :
 	BREAK
 	;
 	
+//parameter_list :
+//	parameter
+//	|
+//	parameter_list COMMA parameter 
+//	;
+
 parameter_list :
 	parameter
 	|
-	parameter_list COMMA parameter 
+	parameter COMMA parameter_list
 	;
 	
 parameter :
@@ -153,7 +159,7 @@ control_flow :
 	|
 	( CALL | LCALL | ACALL ) class_method_identifier
 	|
-	RETURN
+	RETURN ( expression )?
 	;
 	
 if_statement :

@@ -7,7 +7,7 @@ use crate::parser::tacparser::Binary_operatorContext;
 use crate::{parser::node::Node, common::number_literal_parser::number_literal_to_u16};
 use crate::common::number_literal_parser::is_number_literal_u16;
 
-use super::tacparser::{Or_operatorContext, And_operatorContext, Equals_operatorContext, Left_hand_sideContext, Function_callContext, OperandContext, LabelContext, If_statementContext, Control_flowContext, PredicateContext};
+use super::tacparser::{Or_operatorContext, And_operatorContext, Equals_operatorContext, Left_hand_sideContext, Function_callContext, OperandContext, LabelContext, If_statementContext, Control_flowContext, PredicateContext, Parameter_listContext, ParameterContext};
 use super::{tacparser::{tacContextType, Source_lineContext, AssignmentContext, ExpressionContext, Compilation_unitContext}, tacvisitor::tacVisitorCompat, tac_line::TacLine};
 use std::cell::Ref;
 use std::borrow::Cow;
@@ -448,13 +448,13 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
-        let function_name: &String = &visit_children_result[0].value;
+        let function_name: &String = &visit_children_result[0].value.to_lowercase();
 
         log::info!("function_name: {}\n", function_name);
 
         if "sqrt".eq(function_name)
         {
-            log::info!("LUL: {:?}\n", visit_children_result[1]);
+            log::info!("child_1: {:?}\n", visit_children_result[1]);
 
             let mut op_node: Node<String> = visit_children_result[1].clone();
             op_node.expression = true;
@@ -467,7 +467,7 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         }
         else if "sizeof".eq(function_name)
         {
-            log::info!("LUL: {:?}\n", visit_children_result[1]);
+            log::info!("child_1: {:?}\n", visit_children_result[1]);
 
             let mut op_node: Node<String> = visit_children_result[1].clone();
             op_node.expression = true;
@@ -478,6 +478,61 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
             return vec![op_node];
         }
+        else if "break".eq(function_name)
+        {
+            self.line.line_type = TacLineType::BREAK;
+        }
+        else if "print".eq(function_name)
+        {
+            self.line.line_type = TacLineType::PRINT;
+
+            log::info!("child_1: {:?}\n", visit_children_result[1]);
+
+            // let mut op_node: Node<String> = visit_children_result[1].clone();
+            // op_node.expression = true;
+            // op_node.value = String::from("print");
+            // op_node.left = Some(Box::new(visit_children_result[1].clone()));
+
+            // log::info!("op_node: {:?}\n", op_node);
+
+            self.line.expression_1 = Some(Box::new(visit_children_result[1].clone()));
+
+            return visit_children_result;
+        }
+        else if "push".eq(function_name)
+        {
+            self.line.line_type = TacLineType::PUSH;
+
+            self.line.expression_1 = Some(Box::new(visit_children_result[1].clone()));
+        }
+        else if "pop".eq(function_name)
+        {
+            self.line.line_type = TacLineType::POP;
+
+            self.line.expression_1 = Some(Box::new(visit_children_result[1].clone()));
+        }
+
+        visit_children_result
+    }
+
+    fn visit_parameter_list(&mut self, ctx: &Parameter_listContext<'i>) -> Self::Return {
+        self.descend_indent("visit_parameter_list");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        log::info!("visit_parameter_list: {:?}\n", visit_children_result[0]);
+
+        visit_children_result
+    }
+
+    fn visit_parameter(&mut self, ctx: &ParameterContext<'i>) -> Self::Return {
+        self.descend_indent("visit_parameter");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        log::info!("visit_parameter: {:?}\n", visit_children_result[0]);
+
+        self.line.parameter_list.push(visit_children_result[0].value.clone());
 
         visit_children_result
     }
@@ -504,17 +559,24 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
             self.line.expression_1 = Some(Box::new(visit_children_result[0].clone()));
             self.line.target_label = visit_children_result[2].value.clone();
         }
-        
-        if visit_children_result[0].value.to_lowercase().eq("goto")
+        else if visit_children_result[0].value.to_lowercase().eq("goto")
         {
             self.line.line_type = TacLineType::GOTO;
             self.line.target_label = visit_children_result[1].value.clone();
         }
-
-        if visit_children_result[0].value.to_lowercase().eq("call")
+        else if visit_children_result[0].value.to_lowercase().eq("call")
         {
             self.line.line_type = TacLineType::CALL;
             self.line.target_label = visit_children_result[1].value.clone();
+        }
+        else if visit_children_result[0].value.to_lowercase().eq("return")
+        {
+            self.line.line_type = TacLineType::RETURN;
+
+            if (visit_children_result.len() > 1)
+            {
+                self.line.expression_1 = Some(Box::new(visit_children_result[1].clone()));
+            }
         }
 
         visit_children_result

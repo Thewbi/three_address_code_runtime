@@ -22,10 +22,10 @@
 ;*t4 = t2
 ;*t_5 = t_1
 
-t_2 = &a
+;t_2 = &a
 
 ;*(this + 4) = x
 ;x = *(this + 8)
 
-;t5 = sqrt(t4)
+t5 = sqrt(t4)
 ;t_3 = sizeof(int)
