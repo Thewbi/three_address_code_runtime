@@ -4,7 +4,7 @@ BeginFunc test_func
 EndFunc
 */
 
-
+/*
 BeginFunc test_func
 	_t0 = x * x
 	_t1 = y * y
@@ -16,8 +16,9 @@ _L0:
 	Goto _L0
 _L1:
 EndFunc
+*/
 
-/*
+
 BeginFunc _8
     _t0 = 137
     push _t0
@@ -26,6 +27,7 @@ BeginFunc _8
     pop _t0
 EndFunc
 
+/*
 BeginFunc _4
     y = x
 EndFunc
