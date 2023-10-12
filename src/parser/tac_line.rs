@@ -34,6 +34,8 @@ pub struct TacLine {
 
     // pub direct_data: Vec<u8>,
 
+    pub class: String,
+
     pub source_file: String,
     pub line: isize,
     pub column: isize,
@@ -57,6 +59,7 @@ impl TacLine {
         target_label: String,
         // target_address: i16,
         // io_dest: IoDestination,
+        class: String,
         source_file: String,
         line: isize,
         column: isize,
@@ -81,6 +84,7 @@ impl TacLine {
             // idx: 0u32,
             // address: 0u32,
             // direct_data: Vec::default(),
+            class: class,
             source_file: source_file,
             line: line,
             column: column,
@@ -107,6 +111,7 @@ impl TacLine {
         // self.idx = u32::default();
         // self.address = u32::default();
         // self.direct_data = Vec::default();
+        self.class = String::default();
         self.source_file = String::default();
         self.line = isize::default();
         self.column = isize::default();
@@ -143,6 +148,7 @@ impl Default for TacLine {
             // idx: u32::default(),
             // address: u32::default(),
             // direct_data: Vec::default(),
+            class: String::default(),
             source_file: String::default(),
             line: isize::default(),
             column: isize::default(),
@@ -154,7 +160,7 @@ impl Default for TacLine {
 impl fmt::Display for TacLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         //write!(f, "(idx:{:<4} {:#04x}, addr:{:<4} {:#04x}, label:{:<10}, rtype:{:<5}, itype:{:<5}, reg_1:{:<3} {:#04x}, reg_2:{:<3} {:#04x}, expr_1: {:?}, expr_2: {:?}, data:{} {:#04x}, tgt_label:{}, tgt_addr:{}, source_file:{}, line:{}, column:{})", 
-        write!(f, "(lhs: {:?}, lhs_deref: {:?}, type: {:?}, label: {:?}, expr_1: {:?}, expr_2: {:?}, parameter_list: {:?}, target_label: {:?}, source_file:{}, line:{}, column:{})", 
+        write!(f, "(lhs: {:?}, lhs_deref: {:?}, type: {:?}, label: {:?}, expr_1: {:?}, expr_2: {:?}, parameter_list: {:?}, target_label: {:?}, class: {:?}, source_file:{}, line:{}, column:{})", 
             self.lhs,
             self.lhs_deref,
             self.line_type,
@@ -168,6 +174,7 @@ impl fmt::Display for TacLine {
             // self.data, self.data,
             self.parameter_list,
             self.target_label, //self.target_address,
+            self.class,
             self.source_file, self.line, self.column)
     }
 }

@@ -1,4 +1,5 @@
-_A.fn:
+/*
+_A.some_method:
     BeginFunc _4
         y = x
     EndFunc
@@ -8,9 +9,10 @@ main:
 		_t0 = 137
 		push _t0
 		push a
-		call _A.fn
+		call _A.some_method
 		pop _t0
 	EndFunc
+*/
 
 /*
 _A.fn:
@@ -28,7 +30,7 @@ main:
  	EndFunc
 */
 
-/*
+/**/
 _A.fn:
 	BeginFunc _4;
 		*(this + 4) = x;
@@ -43,7 +45,7 @@ main:
 		call _A.fn;
 		pop 8;
 	EndFunc;
-*/
+
 
 /*
 _Base.hi:

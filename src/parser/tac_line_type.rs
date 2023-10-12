@@ -26,6 +26,8 @@ pub enum TacLineType {
 
     FUNC_DEFINITION_END,
 
+    CLASS_METHOD,
+
     #[default]
     UNKNOWN,
 
@@ -48,6 +50,7 @@ impl TacLineType {
             TacLineType::RETURN => String::from("RETURN"),
             TacLineType::FUNC_DEFINITION => String::from("FUNC_DEFINITION"),
             TacLineType::FUNC_DEFINITION_END => String::from("FUNC_DEFINITION_END"),
+            TacLineType::CLASS_METHOD => String::from("CLASS_METHOD"),
             _ => String::from("UNKNOWN"),
         }
 

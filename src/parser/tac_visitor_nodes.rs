@@ -6,7 +6,7 @@ use crate::parser::tac_line_type::TacLineType;
 use crate::parser::tacparser::{Binary_operatorContext, Function_definitionContextAttrs};
 use crate::parser::node::Node;
 
-use super::tacparser::{Or_operatorContext, And_operatorContext, Equals_operatorContext, Left_hand_sideContext, Function_callContext, OperandContext, LabelContext, If_statementContext, Control_flowContext, PredicateContext, Parameter_listContext, ParameterContext, Function_definitionContext};
+use super::tacparser::{Or_operatorContext, And_operatorContext, Equals_operatorContext, Left_hand_sideContext, Function_callContext, OperandContext, LabelContext, If_statementContext, Control_flowContext, PredicateContext, Parameter_listContext, ParameterContext, Function_definitionContext, Class_method_identifierContext};
 use super::{tacparser::{tacContextType, Source_lineContext, AssignmentContext, ExpressionContext, Compilation_unitContext}, tacvisitor::tacVisitorCompat, tac_line::TacLine};
 use std::cell::Ref;
 use std::borrow::Cow;
@@ -453,31 +453,31 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
         let function_name: &String = &visit_children_result[0].value.to_lowercase();
 
-        log::info!("function_name: {}\n", function_name);
+        //log::info!("function_name: {}\n", function_name);
 
         if "sqrt".eq(function_name)
         {
-            log::info!("child_1: {:?}\n", visit_children_result[1]);
+            //log::info!("child_1: {:?}\n", visit_children_result[1]);
 
             let mut op_node: Node<String> = visit_children_result[1].clone();
             op_node.expression = true;
             op_node.value = String::from("sqrt");
             op_node.left = Some(Box::new(visit_children_result[1].clone()));
 
-            log::info!("op_node: {:?}\n", op_node);
+            //log::info!("op_node: {:?}\n", op_node);
 
             return vec![op_node];
         }
         else if "sizeof".eq(function_name)
         {
-            log::info!("child_1: {:?}\n", visit_children_result[1]);
+            //log::info!("child_1: {:?}\n", visit_children_result[1]);
 
             let mut op_node: Node<String> = visit_children_result[1].clone();
             op_node.expression = true;
             op_node.value = String::from("sizeof");
             op_node.left = Some(Box::new(visit_children_result[1].clone()));
 
-            log::info!("op_node: {:?}\n", op_node);
+            //log::info!("op_node: {:?}\n", op_node);
 
             return vec![op_node];
         }
@@ -489,7 +489,7 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         {
             self.line.line_type = TacLineType::PRINT;
 
-            log::info!("child_1: {:?}\n", visit_children_result[1]);
+            //log::info!("child_1: {:?}\n", visit_children_result[1]);
 
             // let mut op_node: Node<String> = visit_children_result[1].clone();
             // op_node.expression = true;
@@ -670,6 +670,29 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
 
         self.lines.push(self.line.clone());
         self.line.clear();
+
+        visit_children_result
+    }
+
+    fn visit_class_method_identifier(&mut self, ctx: &Class_method_identifierContext<'i>) -> Self::Return 
+    {
+        self.descend_indent("visit_class_method_identifier");
+        let visit_children_result = self.visit_children(ctx);
+        self.ascend_indent();
+
+        log::info!("visit_class_method_identifier 0: {:?}\n", visit_children_result[0]);
+        log::info!("visit_class_method_identifier 1: {:?}\n", visit_children_result[1]);
+        log::info!("visit_class_method_identifier 2: {:?}\n", visit_children_result[2]);
+
+        let token: Ref<'_, GenericToken<Cow<'_, str>>> = ctx.start();
+
+        self.line.source_file = self.source_file.clone();
+        self.line.line = token.line;
+        self.line.column = token.column;
+
+        self.line.line_type = TacLineType::CLASS_METHOD;
+        self.line.class = visit_children_result[0].value.clone();
+        self.line.label = visit_children_result[2].value.clone();
 
         visit_children_result
     }
