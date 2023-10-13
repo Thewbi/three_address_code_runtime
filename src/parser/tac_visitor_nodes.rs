@@ -18,6 +18,7 @@ use antlr_rust::tree::NoError;
 pub struct TacVisitorNodes {
 
     // result
+    pub idx: u32,
     pub lines: Vec<TacLine>,
     pub line: TacLine,
 
@@ -37,6 +38,7 @@ impl Default for TacVisitorNodes {
     fn default() -> Self {
         Self {
 
+            idx: u32::default(),
             lines: Vec::new(),
             line: TacLine::default(),
 
@@ -165,8 +167,11 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         let visit_children_result = self.visit_children(ctx);
         self.ascend_indent();
 
+        self.idx = self.idx + 1u32;
+        self.line.idx = self.idx;
         self.lines.push(self.line.clone());
         self.line.clear();
+        
 
         visit_children_result
     }
@@ -273,7 +278,13 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
             else 
             {
                 let mut literal_expression: Node<String> = Node::new(visit_children_result[0].value.clone());
+
                 literal_expression.expression = true;
+
+                // set the expression flag to false because the evaluator implementation expects a value
+                // of false for nodes that carry literals (nodes that contain no further children)
+                //literal_expression.expression = false;
+                
                 return vec![literal_expression];
             }
 
@@ -641,6 +652,8 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         local_line.line = token.line;
         local_line.column = token.column;
         
+        self.idx = self.idx + 1u32;
+        local_line.idx = self.idx;
         self.lines.push(local_line);
 
         
@@ -668,6 +681,8 @@ impl<'i> tacVisitorCompat<'i> for TacVisitorNodes {
         self.line.line = token.line;
         self.line.column = token.column;
 
+        self.idx = self.idx + 1u32;
+        self.line.idx = self.idx;
         self.lines.push(self.line.clone());
         self.line.clear();
 

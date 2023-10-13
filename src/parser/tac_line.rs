@@ -6,6 +6,8 @@ use std::fmt;
 #[derive(Debug, Clone)]
 pub struct TacLine {
 
+    pub idx: u32,
+
     pub lhs: String,
     pub lhs_deref: bool,
 
@@ -13,26 +15,12 @@ pub struct TacLine {
 
     pub label: String,
 
-    // pub instruction_type: InstructionType,
-
-    // pub reg_1: u16,
-    // pub reg_2: u16,
-
     pub expression_1: Option<Box<Node<String>>>,
     pub expression_2: Option<Box<Node<String>>>,
 
-    // pub data: u16,
     pub parameter_list: Vec<String>,
 
     pub target_label: String,
-    // pub target_address: i16,
-
-    // pub io_dest: IoDestination,
-
-    // pub idx: u32,
-    // pub address: u32,
-
-    // pub direct_data: Vec<u8>,
 
     pub class: String,
 
@@ -40,140 +28,89 @@ pub struct TacLine {
     pub line: isize,
     pub column: isize,
 
-    //pub remove: bool,
-
 }
 
 impl TacLine {
 
     #[allow(dead_code)]
     pub fn new(
+        idx: u32,
         lhs: String,
         lhs_deref: bool,
         line_type: TacLineType,
         label: String,
-        // instruction_type: InstructionType,
-        // reg_1: u16,
-        // reg_2: u16,
-        // data: u16,
         target_label: String,
-        // target_address: i16,
-        // io_dest: IoDestination,
         class: String,
         source_file: String,
         line: isize,
         column: isize,
-        //remove: bool,
     ) -> TacLine {
         TacLine {
+            idx: idx,
             lhs: lhs,
             lhs_deref: lhs_deref,
             line_type: line_type,
-            // record_type: record_type,
             label: label,
             parameter_list: Vec::default(),
-            // instruction_type: instruction_type,
-            // reg_1: reg_1,
-            // reg_2: reg_2,
             expression_1: None,
             expression_2: None,
-            // data: data,
             target_label: target_label,
-            // target_address: target_address,
-            // io_dest: io_dest,
-            // idx: 0u32,
-            // address: 0u32,
-            // direct_data: Vec::default(),
             class: class,
             source_file: source_file,
             line: line,
             column: column,
-            // remove: false,
         }
     }
 
     pub fn clear(&mut self) {
+        self.idx = u32::default();
         self.lhs = String::default();
         self.lhs_deref = false;
         self.line_type = TacLineType::UNKNOWN;
-        // self.record_type = AsmRecordType::UNKNOWN;
         self.label = String::default();
-        // self.instruction_type = InstructionType::UNKNOWN;
-        // self.reg_1 = 0xFF;
-        // self.reg_2 = 0xFF;
         self.expression_1 = None;
         self.expression_2 = None;
-        // self.data = u16::default();
         self.parameter_list = Vec::default();
         self.target_label = String::default();
-        // self.target_address = 0i16;
-        // self.io_dest = IoDestination::UNKNOWN;
-        // self.idx = u32::default();
-        // self.address = u32::default();
-        // self.direct_data = Vec::default();
         self.class = String::default();
         self.source_file = String::default();
         self.line = isize::default();
         self.column = isize::default();
-        // self.remove = false;
     }
 
-    // pub fn set_idx(&mut self, idx: u32) {
-    //     self.idx = idx;
-    // }
-
-    // pub fn set_address(&mut self, address: u32) {
-    //     self.address = address;
-    // }
-    
 }
 
 impl Default for TacLine {
     fn default() -> Self {
         Self {
+            idx: u32::default(),
             lhs: String::default(),
             lhs_deref: false,
             line_type: TacLineType::UNKNOWN,
             label: String::default(),
-            // instruction_type: InstructionType::UNKNOWN,
-            // reg_1: 0xFF,
-            // reg_2: 0xFF,
             expression_1: None,
             expression_2: None,
-            // data: u16::default(),
             parameter_list: Vec::default(),
             target_label: String::default(),
-            // target_address : 0i16,
-            // io_dest: IoDestination::UNKNOWN,
-            // idx: u32::default(),
-            // address: u32::default(),
-            // direct_data: Vec::default(),
             class: String::default(),
             source_file: String::default(),
             line: isize::default(),
             column: isize::default(),
-            // remove: false,
         }
     }
 }
 
 impl fmt::Display for TacLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        //write!(f, "(idx:{:<4} {:#04x}, addr:{:<4} {:#04x}, label:{:<10}, rtype:{:<5}, itype:{:<5}, reg_1:{:<3} {:#04x}, reg_2:{:<3} {:#04x}, expr_1: {:?}, expr_2: {:?}, data:{} {:#04x}, tgt_label:{}, tgt_addr:{}, source_file:{}, line:{}, column:{})", 
-        write!(f, "(lhs: {:?}, lhs_deref: {:?}, type: {:?}, label: {:?}, expr_1: {:?}, expr_2: {:?}, parameter_list: {:?}, target_label: {:?}, class: {:?}, source_file:{}, line:{}, column:{})", 
+        write!(f, "(idx: {:?}, lhs: {:?}, lhs_deref: {:?}, type: {:?}, label: {:?}, expr_1: {:?}, expr_2: {:?}, parameter_list: {:?}, target_label: {:?}, class: {:?}, source_file:{}, line:{}, column:{})", 
+            self.idx,
             self.lhs,
             self.lhs_deref,
             self.line_type,
-            // self.idx, self.idx,
-            // self.address, self.address,
             self.label, 
-            // self.record_type.to_string(), self.instruction_type.to_string(),
-            // self.reg_1, self.reg_1,
-            // self.reg_2, self.reg_2,
             self.expression_1, self.expression_2,
-            // self.data, self.data,
             self.parameter_list,
-            self.target_label, //self.target_address,
+            self.target_label,
             self.class,
             self.source_file, self.line, self.column)
     }

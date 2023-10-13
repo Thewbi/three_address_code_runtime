@@ -9,10 +9,12 @@ edition = "2021"
 env_logger = "0.10.0"
 log = "0.4.18"
 chrono = "0.4.26"
-ihex = "3.0"
-byteorder = "1.4.3"
+#ihex = "3.0"
+#byteorder = "1.4.3"
 regex = "1.9.3"
-lazy_static = "1.4.0"
+#lazy_static = "1.4.0"
+dyn-fmt = "0.4.0"
+#windows_x86_64_msvc = "0.48.5"
 
 # https://github.com/rrevenantt/antlr4rust
 # checked out and manually build, locally referenced

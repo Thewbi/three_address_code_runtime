@@ -1,5 +1,6 @@
 mod parser;
 mod common;
+mod evaluator;
 
 use std::fs;
 use std::rc::Rc;
@@ -14,9 +15,24 @@ use antlr_rust::tree::ParseTreeVisitorCompat;
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 
+use dyn_fmt::AsStrFormatExt;
+
+use crate::evaluator::evaluator::Evaluator;
+use crate::parser::tac_line::TacLine;
 use crate::parser::tac_visitor_nodes::TacVisitorNodes;
 use crate::parser::tacparser::Compilation_unitContextAll;
 use crate::parser::tacparser::tacContextType;
+
+//
+// Make sure that your PATH environment variable only contains a single rust installation
+// where rustc
+// C:\Users\U5353\.cargo\bin\rustc.exe
+//
+// rustup update
+// rustup update stable-x86_64-pc-windows-msvc
+// cargo update -p libc
+// cargo update
+//
 
 //
 // First, build the grammar
@@ -42,7 +58,7 @@ fn main() {
     // the symbol table
     let mut symbol_table: HashMap<String, u32> = HashMap::new();
 
-    load_segment_from_source_code(&mut symbol_table);
+    load_segment_from_source_code();
 
     // let token_factory: antlr_rust::token_factory::ArenaFactory<'_, antlr_rust::token_factory::CommonTokenFactory, antlr_rust::token::GenericToken<_>> = ArenaCommonFactory::default();
     // let mut _lexer: parser::assembler_lexerlexer::assembler_lexer<'_, InputStream<&str>> = parser::assembler_lexerlexer::assembler_lexer::new_with_token_factory(
@@ -65,57 +81,8 @@ fn main() {
     log_end();
 }
 
-fn load_segment_from_source_code(/*segments: &mut Vec<Segment>,*/ symbol_table: &mut HashMap<String, u32>) /*-> [u8; RAMEND as usize] */
+fn load_segment_from_source_code() /*-> [u8; RAMEND as usize] */
 {
-/*
-    //
-    // Phase - load token into a hashmap
-    //
-
-    log::info!("**********************************************\n");
-    log::info!("Phase - load token into a hashmap\n");
-    log::info!("**********************************************\n");
-
-    let mut token_storage: HashMap<isize, String> = HashMap::new();
-    let mut token_value_storage: HashMap<String, isize> = HashMap::new();
-
-    let mut token_file_path: String = String::new();
-    token_file_path.push_str("src/parser/assembler_lexer.tokens");
-
-    // open the file in read-only mode (ignoring errors).
-    let file = File::open(token_file_path).unwrap();
-    let reader = BufReader::new(file);
-
-    // read the file line by line using the lines() iterator from std::io::BufRead.
-    for (index, line) in reader.lines().enumerate() {
-
-        // ignore errors.
-        let line = line.unwrap();
-
-        // DEBUG show the line and its number.
-        log::trace!("{}. {}\n", index + 1, line);
-
-        // https://stackoverflow.com/questions/26643688/how-do-i-split-a-string-in-rust
-        let collection: Vec<&str> = line.split('=').collect::<Vec<_>>();
-
-        let token:&str = collection[0];
-        let token_idx:i16 = collection[1].parse::<i16>().unwrap();
-        let token_idx_as_usize:isize = token_idx.into();
-
-        // at the end of the token file, the individual characters are repeated but
-        // the purpose of the token map is to just contain the token labels/names and not
-        // the individual characters so break on the first duplicate
-        if token_storage.contains_key(&token_idx_as_usize) {
-            break;
-        }
-        token_storage.insert(token_idx_as_usize, token.to_string());
-
-        if token_value_storage.contains_key(&token.to_string()) {
-            break;
-        }
-        token_value_storage.insert(token.to_string(), token_idx_as_usize);
-    }
-*/
     //
     // Phase - read the .asm file
     //
@@ -143,7 +110,9 @@ fn load_segment_from_source_code(/*segments: &mut Vec<Segment>,*/ symbol_table: 
     //source_code_file_path.push_str("test_resources/sample_files/tac/print.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/push_pop.tac");
     //source_code_file_path.push_str("test_resources/sample_files/tac/return.tac");
-    source_code_file_path.push_str("test_resources/sample_files/tac/oop.tac");
+    //source_code_file_path.push_str("test_resources/sample_files/tac/oop.tac");
+
+    source_code_file_path.push_str("test_resources/sample_files/tac/loop_application.tac");
 
     let srcdir = PathBuf::from(&source_code_file_path);
     log::info!("absolute path: {:?}\n", fs::canonicalize(&srcdir));
@@ -153,14 +122,13 @@ fn load_segment_from_source_code(/*segments: &mut Vec<Segment>,*/ symbol_table: 
 
     let input_stream: InputStream<&str> = InputStream::new(data.as_str());
 
-    parse_and_encode(/*segments, */input_stream, source_code_file_path.clone()/*, symbol_table */)
+    parse_and_encode(input_stream, source_code_file_path.clone())
 
 }
 
-fn parse_and_encode(/*segments: &mut Vec<Segment>, */
+fn parse_and_encode(
     input_stream: InputStream<&str>, 
-    source_file: String,
-/*symbol_table: &mut HashMap<String, u32>*/) /*-> [u8; RAMEND as usize] */
+    source_file: String)
 {
     //
     // Phase - AST Creation (Grammar Lexing and Parsing)
@@ -189,7 +157,6 @@ fn parse_and_encode(/*segments: &mut Vec<Segment>, */
     // node visitor
     let mut visitor: TacVisitorNodes = TacVisitorNodes::default();
     visitor.source_file = source_file.clone();
-    //visitor.record.clear();
 
     let _visitor_result = visitor.visit(&*root);
 
@@ -201,6 +168,128 @@ fn parse_and_encode(/*segments: &mut Vec<Segment>, */
     for line in visitor.lines.iter_mut() {
         log::info!("{}\n", line);
         log::info!("\n");
+    }
+
+    log::info!("*************************************************************\n");
+    log::info!("Phase - construct symbol table\n");
+    log::info!("*************************************************************\n");
+
+    // the symbol table
+    let mut symbol_table: HashMap<String, u32> = HashMap::new();
+
+    for line in visitor.lines.iter_mut() {
+        if !line.label.is_empty() 
+        {
+            symbol_table.insert(line.label.clone(), line.idx - 1u32);
+        }
+    }
+
+    // DEBUG - output symbol table
+    for (label, idx) in &symbol_table {
+        println!("Label: {} -> idx: {:#04X} {}d", label, idx, idx);
+    }
+
+    log::info!("*************************************************************\n");
+    log::info!("Phase - execute\n");
+    log::info!("*************************************************************\n");
+
+    let mut variable_table: HashMap<String, u32> = HashMap::new();
+
+    let mut evaluator: Evaluator = Evaluator::new();
+    let mut pc: usize = 0usize;
+    let mut done: bool = false;
+    while !done 
+    {
+        if pc >= visitor.lines.len()
+        {
+            done = true;
+            continue;
+        }
+
+        let curr_line: &TacLine = &visitor.lines[pc];
+
+        // DEBUG output the current line
+        log::trace!("{}\n", curr_line);
+
+        match curr_line.line_type 
+        {
+            parser::tac_line_type::TacLineType::ASSIGNMENT => 
+            {
+                log::trace!("assignment!");
+
+                // DEBUG
+                //log::info!("lhs: {}\n", curr_line.lhs);
+
+                // check if lhs exists in the list of variables, otherwise insert it with a default value
+                let _lhs_value: u32 = *variable_table.entry(curr_line.lhs.clone()).or_insert(0u32);
+
+                // evaluate rhs
+                let rhs_value: u32 = evaluator.evaluate(&symbol_table, &variable_table, &curr_line.expression_2);
+
+                //log::info!("{} = {}\n", &lhs_value, rhs_value);
+
+                variable_table.insert(curr_line.lhs.clone(), rhs_value);
+
+                pc = pc + 1usize;
+            }, 
+
+            parser::tac_line_type::TacLineType::IF_STATEMENT => 
+            {
+                log::trace!("if statement!");
+
+                let predicate: u32 = evaluator.evaluate(&symbol_table, &variable_table, &curr_line.expression_1);
+                if predicate != 0u32
+                {
+                    // if the option is empty, return 0
+                    if curr_line.target_label.is_empty() 
+                    {
+                        panic!("no target label specified!");
+                    }
+
+                    let idx_option = symbol_table.get(&curr_line.target_label);
+                    if idx_option.is_none()
+                    {
+                        panic!("unknown target label used!");
+                    }
+
+                    let idxx: u32 = *idx_option.unwrap();
+                    pc = idxx as usize; 
+                }
+                else
+                {
+                    pc = pc + 1usize;
+                }
+            },
+
+            parser::tac_line_type::TacLineType::PRINT => 
+            {
+                let format_string: String = curr_line.expression_1.as_ref().unwrap().value.clone();
+
+                // resolve variable name to it's value
+                let elem_key: &String = &curr_line.parameter_list[0];
+                let elem_value: Option<&u32> = variable_table.get(elem_key);
+
+                // dynamic format from crate https://crates.io/crates/dyn-fmt
+                let test: String = format_string.format(&elem_value);
+                
+                // print the value
+                log::info!("{}\n", test);
+
+                pc = pc + 1usize;
+            },
+
+            _ => 
+            {
+                log::error!("unknown line type!\n");
+                done = true;
+            },
+        }
+    }
+    log::info!("end of program reached\n");
+
+    // DEBUG - output variable table
+    for (variable, value) in &variable_table {
+        log::info!("variableValue: {} = {} ({:#04X})\n", variable, value, value);
     }
 
 }
